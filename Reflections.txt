@@ -1,0 +1,41 @@
+Identifying lane lines with separeted line-segments
+---------------------------------------------------
+1. To identify the lanes correctly for all images, I modified the Canny threshold as follows
+low_threshold = 100
+high_threshold = 250 
+
+to eliminate spurious edges other than the lanes themselves.
+
+2. I then had to mask the canny edge output image to only contain the region of interest defined by the vertices defined by the trapezoidal limits containing the lanes as two non-parallel sides.
+
+3. The HoughLinesP parameters were as follows:
+rho=2,
+theta=pi/180,
+threshold=15 (hough grid cell votes),
+min_line_length=5 and
+max_line_gap=10.
+
+4. The lines themselves are weighted with the color image to produce the overlay of the red line lanes.
+I used a thickness=5 to draw the lines.
+
+5. Finally, to display the image in JPEG in the right color channels, I had flip it from what matplotlib uses (using numpy.fliplr)
+
+Regarding line extrapolation
+----------------------------
+1. I first threshold the slope to include candidates that satisfy a range of angles of inclination.
+I chose between 25-75 degrees.
+
+2. The extrapolation itself involves preparing a vector of contiguous segments, with the common end point being the midpoint of the line-segment.
+Thus, if the original line-segments are 
+(x11,y11,x12,y12),
+(x21, y21, x22, y22),
+(x31, y31, x33, y33)
+
+then the contiguous extrapolated line-segments to be drawn would be
+(x11, y11, (x11+x12)/2, (x12+y12)/2),
+((x11+x12)/2, (x12+y12)/2, (x21+x22)/2, (y21+y22)/2),
+((x21+x22)/2, (y21+y22)/2, x33, y33)
+
+Points of improvement
+---------------------
+The algorithm can be improved in extarpolating solid lines where line-segments with similar slope can be in parallel and non-collinear. In such a case, computing the midpoints of these segments and connecting them could result in spurious zig-zag lines that needs to be avoided.
